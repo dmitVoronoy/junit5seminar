@@ -1,0 +1,20 @@
+[
+  {
+    "name": "warehouse",
+    "address": "",
+    "area": 1000,
+    "builtYear": 1997
+  },
+  {
+    "name": "office",
+    "address": "",
+    "area": 500,
+    "builtYear": 2001
+  },
+  {
+    "name": "residential",
+    "address": "",
+    "area": 700,
+    "builtYear": 2005
+  }
+]
