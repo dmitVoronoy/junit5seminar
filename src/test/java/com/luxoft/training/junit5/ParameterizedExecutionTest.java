@@ -17,6 +17,17 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 
 public class ParameterizedExecutionTest {
+    static Stream<String> stringStream() {
+        return Stream.of("first", "second");
+    }
+
+    static Stream<Arguments> multipleParametersStream() {
+        return Stream.of(
+                arguments("firstString", 1),
+                arguments("secondString", 2)
+        );
+    }
+
     @ParameterizedTest
     @ValueSource(ints = {2, 4, 6})
     void intValueSource(int arg) {
@@ -35,7 +46,7 @@ public class ParameterizedExecutionTest {
 
     @ParameterizedTest
     @EnumSource(mode = EXCLUDE, names = {"MONDAY", "TUESDAY"})
-    void enumSourceInclude(DayOfWeek arg) {
+    void enumSourceExclude(DayOfWeek arg) {
     }
 
     @ParameterizedTest
@@ -43,20 +54,9 @@ public class ParameterizedExecutionTest {
     void methodSource(String arg) {
     }
 
-    static Stream<String> stringStream() {
-        return Stream.of("first", "second");
-    }
-
     @ParameterizedTest
     @MethodSource("multipleParametersStream")
     void methodSourceMultiple(String string, int number) {
-    }
-
-    static Stream<Arguments> multipleParametersStream() {
-        return Stream.of(
-                arguments("firstString", 1),
-                arguments("secondString", 2)
-        );
     }
 
     @ParameterizedTest
@@ -87,14 +87,6 @@ public class ParameterizedExecutionTest {
     void argumentProviderTest(String string) {
     }
 
-    static class CustomArgumentProvider implements ArgumentsProvider {
-        @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            // provide arguments from amy source: files, network, db, etc.
-            return Stream.of("1", "2").map(Arguments::arguments);
-        }
-    }
-
     @ParameterizedTest(name = "Called with {0}")
     @CsvSource(textBlock = """
                 cat, 1
@@ -103,6 +95,14 @@ public class ParameterizedExecutionTest {
             """)
     void csvSourceAggregated(@AggregateWith(CustomAggregator.class) Pet pet) {
         assertTrue(pet.id < 4);
+    }
+
+    static class CustomArgumentProvider implements ArgumentsProvider {
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            // provide arguments from any source
+            return Stream.of("1", "2").map(Arguments::arguments);
+        }
     }
 
     static class CustomAggregator implements ArgumentsAggregator {

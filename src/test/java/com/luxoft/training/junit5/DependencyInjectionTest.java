@@ -22,6 +22,7 @@ public class DependencyInjectionTest {
 
     @RepeatedTest(10)
     void repeatedTest(RepetitionInfo repetitionInfo) {
-        assertEquals(10, repetitionInfo.getTotalRepetitions());
+        assertEquals(10,
+                repetitionInfo.getTotalRepetitions());
     }
 }

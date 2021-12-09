@@ -9,54 +9,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestTemplateTest {
-    static class UrlShortener {
-        private final int length;
-        private final String base;
-
-        private final Encoder encoder = Base64.getEncoder();
-
-        UrlShortener(int length, String base) {
-            this.length = length;
-            this.base = base;
-        }
-
-        String generate(String url) {
-            return base + encoder.encodeToString(url.getBytes()).substring(0, length);
-        }
-    }
-
-    @TestTemplate
-    @ExtendWith(UrlShortenerTestInvocationContextProvider.class)
-    void urlShortenerTest(UrlShortenerTestContext testContext) {
-
-    }
-
-    private class UrlShortenerTestInvocationContextProvider implements TestTemplateInvocationContextProvider {
-
-        @Override
-        public boolean supportsTestTemplate(ExtensionContext context) {
-            return true;
-        }
-
-        @Override
-        public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
-            return Stream.of(urlShortenerInvocationContext(new UrlShortenerTestContext(
-                            "Tests the url shortener with 'https://by.tt' base and 3 symbols length",
-                            "https://by.tt",
-                            3,
-                            "https://by.tt/aHR")),
-                    urlShortenerInvocationContext(new UrlShortenerTestContext(
-                            "Tests the url shortener with 'https://mc.by' base and 4 symbols length",
-                            "https://mc.by",
-                            4,
-                            "https://mc.by/aHR0"))
-            );
-        }
-
-    }
-
     private static TestTemplateInvocationContext urlShortenerInvocationContext(UrlShortenerTestContext testContext) {
         return new TestTemplateInvocationContext() {
             @Override
@@ -68,12 +23,16 @@ public class TestTemplateTest {
             public List<Extension> getAdditionalExtensions() {
                 return asList(new ParameterResolver() {
                                   @Override
-                                  public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+                                  public boolean supportsParameter(ParameterContext parameterContext,
+                                                                   ExtensionContext extensionContext)
+                                          throws ParameterResolutionException {
                                       return true;
                                   }
 
                                   @Override
-                                  public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+                                  public Object resolveParameter(ParameterContext parameterContext,
+                                                                 ExtensionContext extensionContext)
+                                          throws ParameterResolutionException {
                                       return testContext;
                                   }
                               },
@@ -81,6 +40,57 @@ public class TestTemplateTest {
                         (AfterEachCallback) context -> System.out.println("Custom after each implementation"));
             }
         };
+    }
+
+    @TestTemplate
+    @ExtendWith(UrlShortenerTestInvocationContextProvider.class)
+    void urlShortenerTest(UrlShortenerTestContext testContext) {
+        UrlShortener shortener = new UrlShortener(testContext.base(), testContext.length());
+        String shortUrl = shortener.generate("https://url.com");
+        assertEquals(testContext.expectedResult(), shortUrl);
+    }
+
+    static class UrlShortener {
+        private final int length;
+        private final String base;
+
+        private final Encoder encoder = Base64.getEncoder();
+
+        UrlShortener(String base, int length) {
+            this.length = length;
+            this.base = base;
+        }
+
+        String generate(String url) {
+            return base
+                    + encoder
+                    .encodeToString(url.getBytes())
+                    .substring(0, length);
+        }
+    }
+
+    static class UrlShortenerTestInvocationContextProvider implements TestTemplateInvocationContextProvider {
+
+        @Override
+        public boolean supportsTestTemplate(ExtensionContext context) {
+            return true;
+        }
+
+        @Override
+        public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
+            return Stream.of(urlShortenerInvocationContext(new UrlShortenerTestContext(
+                            "Tests the url shortener with 'https://by.tt' base and 3 symbols length",
+                            "https://by.tt/",
+                            3,
+                            "https://by.tt/aHR")),
+                    urlShortenerInvocationContext(new UrlShortenerTestContext(
+                            "Tests the url shortener with 'https://mc.by' base and 4 symbols length",
+                            "https://mc.by/",
+                            4,
+                            "https://mc.by/aHR0"))
+            );
+        }
+
     }
 
     private static class UrlShortenerTestContext {

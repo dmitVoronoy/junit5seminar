@@ -31,7 +31,9 @@ public class DynamicTestsTest {
                 .stream()
                 .map(
                         buildingInfo ->
-                                dynamicTest(buildingInfo.name + " area should be greater then zero",
+                                dynamicTest(
+                                        buildingInfo.name
+                                                + " area should be greater then zero",
                                         () -> assertTrue(buildingInfo.area > 0)));
     }
 

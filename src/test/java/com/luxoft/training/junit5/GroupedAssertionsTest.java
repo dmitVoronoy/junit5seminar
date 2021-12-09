@@ -11,7 +11,8 @@ public class GroupedAssertionsTest {
                 () -> assertEquals("string", "string"),
                 () -> assertTrue(1 == 1));
         assertAll( // dependent assertions
-                () -> assertNotEquals("string1", "string2"), () -> {
+                () -> assertNotEquals("string1", "string2"),
+                () -> {
                     assertNull(null);
                     assertSame(new Object(), new Object());
                 });
